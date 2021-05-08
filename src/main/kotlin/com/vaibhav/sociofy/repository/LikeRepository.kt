@@ -8,10 +8,10 @@ import org.springframework.stereotype.Repository
 @Repository
 interface LikeRepository : JpaRepository<Like, Long> {
 
-    @Query("SELECT s.postId FROM like_table WHERE userId = ?1")
+    @Query("SELECT l.postId FROM like_table l WHERE l.userId = ?1")
     fun findAllPostIdsByUserId(userId: Long): List<Long>
 
-    @Query("SELECT s.userId FROM like_table WHERE postId = ?1")
+    @Query("SELECT l.userId FROM like_table l WHERE l.postId = ?1")
     fun findAllLikersOfAPost(postId: Long): List<Long>
 
 
