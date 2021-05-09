@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.vaibhav.sociofy.Exceptions.PostException
 import com.vaibhav.sociofy.models.Post
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,9 +36,9 @@ class PostServiceImplTest {
 
     @Test
     fun insertIntoDb() {
-        assertDoesNotThrow {
-            postService.insertIntoDb(post)
-        }
+        val post = postService.insertIntoDb(post)
+        assertThat(postService.checkIfPostExists(post.postId)).isTrue()
+
     }
 
     @Test
@@ -74,9 +73,9 @@ class PostServiceImplTest {
     @Test
     fun deletePostWhenPostExists() {
         val post = postService.insertIntoDb(post)
-        assertDoesNotThrow {
-            postService.deletePost(post.postId)
-        }
+        postService.deletePost(post.postId)
+        assertThat(postService.checkIfPostExists(post.postId)).isFalse()
+
     }
 
     @Test

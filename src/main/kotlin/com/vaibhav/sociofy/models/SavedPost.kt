@@ -2,14 +2,19 @@ package com.vaibhav.sociofy.models
 
 import javax.persistence.*
 
-@Entity(name = "like_table")
-@Table(name = "like_table")
-data class Like(
+@Entity(name = "saved_post_table")
+@Table(name = "saved_post_table")
+data class SavedPost(
+
     private val userId:Long,
 
     private val postId:Long,
 
+    private val timeStamp:Long = System.currentTimeMillis(),
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val likeId:Long = 0
+    val saveId:Long = 0,
+
+
 )

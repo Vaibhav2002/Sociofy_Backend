@@ -1,7 +1,7 @@
 package com.vaibhav.sociofy.controller
 
 import com.vaibhav.sociofy.Exceptions.AuthException
-import com.vaibhav.sociofy.models.ErrorResponse
+import com.vaibhav.sociofy.models.response.ErrorResponse
 import com.vaibhav.sociofy.models.User
 import com.vaibhav.sociofy.service.auth.AuthServiceImpl
 import org.springframework.beans.factory.annotation.Autowired

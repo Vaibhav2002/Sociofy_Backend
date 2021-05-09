@@ -55,9 +55,10 @@ class AuthServiceImplTest {
 
     @Test
     fun insert_user_into_db_when_user_does_not_already_exist() {
-        assertDoesNotThrow {
-            insertUserIntoDb()
-        }
+        val user = insertUserIntoDb()
+        val exists = serviceImpl.checkIfUserExistsById(user.userId)
+        assertThat(exists).isTrue()
+
     }
 
     @Test
@@ -143,9 +144,9 @@ class AuthServiceImplTest {
     @Test
     fun delete_user_when_user_exists() {
         val user = insertUserIntoDb()
-        assertDoesNotThrow {
-            serviceImpl.deleteUser(user.userId)
-        }
+        serviceImpl.deleteUser(user.userId)
+        assertThat(serviceImpl.checkIfUserExistsById(user.userId)).isFalse()
+
     }
 
 
