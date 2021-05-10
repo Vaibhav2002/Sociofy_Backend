@@ -1,4 +1,4 @@
-package com.vaibhav.sociofy.models
+package com.vaibhav.sociofy.models.entities
 
 import javax.persistence.*
 
@@ -6,11 +6,11 @@ import javax.persistence.*
 @Table(name = "saved_post_table")
 data class SavedPost(
 
-    private val userId:Long,
+     val userId:Long,
 
-    private val postId:Long,
+     val postId:Long,
 
-    private val timeStamp:Long = System.currentTimeMillis(),
+     val timeStamp:Long = System.currentTimeMillis(),
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

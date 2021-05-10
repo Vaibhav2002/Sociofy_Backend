@@ -1,7 +1,7 @@
 package com.vaibhav.sociofy.service.savedPost
 
-import com.vaibhav.sociofy.Exceptions.SavedPostException
-import com.vaibhav.sociofy.models.SavedPost
+import com.vaibhav.sociofy.exceptions.SavedPostException
+import com.vaibhav.sociofy.models.entities.SavedPost
 import com.vaibhav.sociofy.repository.SavedPostRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -28,6 +28,8 @@ class SavedPostServiceImpl @Autowired constructor(private val savedPostRepositor
     override fun deleteAllSavedPostsOfAUSer(userId: Long) {
         savedPostRepository.deleteAllByUserId(userId)
     }
+
+    override fun deleteAllSavedPosts() = savedPostRepository.deleteAll()
 
     override fun getAllSavedPostsOfAUser(userId: Long): List<SavedPost> =
         savedPostRepository.getAllByUserId(userId)

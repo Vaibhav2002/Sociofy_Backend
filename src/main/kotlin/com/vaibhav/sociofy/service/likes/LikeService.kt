@@ -9,4 +9,11 @@ interface LikeService {
     fun getAllLikedPostsIds(userId: Long):List<Long>
 
     fun getAllLikersOfAPost(postId: Long):List<Long>
+
+    fun deleteAllOfAUser(userId: Long)
+    fun deleteAll()
+
+    fun isLikedByUser(userId: Long):Boolean
+
+    fun getLikeCount(postId: Long):Long
 }

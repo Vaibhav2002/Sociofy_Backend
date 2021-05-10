@@ -1,6 +1,6 @@
 package com.vaibhav.sociofy.service.follower_following
 
-import com.vaibhav.sociofy.models.Follower_Following
+import com.vaibhav.sociofy.models.entities.Follower_Following
 import com.vaibhav.sociofy.repository.FollowerFollowingRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -12,6 +12,9 @@ class FollowFollowingServiceImpl @Autowired constructor(
 
 
     override fun getAllFollowers(userId: Long): List<Long> = repository.findAllFollowers(userId)
+
+    override fun deleteAllOfUser(userId: Long) = repository.deleteAllOfAUser(userId)
+    override fun deleteAll() = repository.deleteAll()
 
     override fun getAllFollowing(userId: Long): List<Long> = repository.findAllFollowing(userId)
 

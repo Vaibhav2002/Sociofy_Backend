@@ -1,7 +1,7 @@
 package com.vaibhav.sociofy.service.savedPost
 
 import com.google.common.truth.Truth.assertThat
-import com.vaibhav.sociofy.Exceptions.SavedPostException
+import com.vaibhav.sociofy.exceptions.SavedPostException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.runner.RunWith

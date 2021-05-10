@@ -10,4 +10,8 @@ interface FollowerFollowingService {
 
     fun unfollowUser(followerId:Long, followingId:Long)
 
+    fun deleteAllOfUser(userId: Long)
+
+    fun deleteAll()
+
 }

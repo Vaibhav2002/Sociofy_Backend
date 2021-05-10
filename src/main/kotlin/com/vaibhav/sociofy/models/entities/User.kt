@@ -1,4 +1,4 @@
-package com.vaibhav.sociofy.models
+package com.vaibhav.sociofy.models.entities
 
 import java.util.*
 import javax.persistence.*

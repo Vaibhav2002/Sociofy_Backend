@@ -1,8 +1,8 @@
 package com.vaibhav.sociofy.service.auth
 
 import com.google.common.truth.Truth.assertThat
-import com.vaibhav.sociofy.Exceptions.AuthException
-import com.vaibhav.sociofy.models.User
+import com.vaibhav.sociofy.exceptions.AuthException
+import com.vaibhav.sociofy.models.entities.User
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows

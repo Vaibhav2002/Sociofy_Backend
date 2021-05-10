@@ -1,8 +1,8 @@
 package com.vaibhav.sociofy.service.post
 
 import com.google.common.truth.Truth.assertThat
-import com.vaibhav.sociofy.Exceptions.PostException
-import com.vaibhav.sociofy.models.Post
+import com.vaibhav.sociofy.exceptions.PostException
+import com.vaibhav.sociofy.models.entities.Post
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.runner.RunWith

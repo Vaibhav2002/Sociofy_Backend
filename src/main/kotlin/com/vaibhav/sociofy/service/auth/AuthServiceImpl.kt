@@ -1,7 +1,7 @@
 package com.vaibhav.sociofy.service.auth
 
-import com.vaibhav.sociofy.Exceptions.AuthException
-import com.vaibhav.sociofy.models.User
+import com.vaibhav.sociofy.exceptions.AuthException
+import com.vaibhav.sociofy.models.entities.User
 import com.vaibhav.sociofy.repository.AuthRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -14,11 +14,11 @@ class AuthServiceImpl @Autowired constructor(
 ) : AuthService {
 
 
-    override fun registerUser(user: User): User {
-        if (checkIfUserExistsByEmail(user.email))
+    override fun registerUser(username: String, email: String, password: String): User {
+        if (checkIfUserExistsByEmail(email))
             throw AuthException("User already exists")
-        user.password = encoder.encode(user.password)
-        return insertUserIntoDB(user)
+        val encodedPassword = encoder.encode(password)
+        return insertUserIntoDB(User(username = username, email = email, password = encodedPassword))
     }
 
     override fun insertUserIntoDB(user: User) = authRepository.save(user)
@@ -34,6 +34,8 @@ class AuthServiceImpl @Autowired constructor(
         authRepository.findById(userId).orElseThrow {
             AuthException("User does not exist")
         }
+
+    override fun getAllUsers(): List<User> = authRepository.findAll()
 
     override fun loginUser(email: String, password: String): User {
         val user = getUserByEmail(email)
@@ -58,4 +60,5 @@ class AuthServiceImpl @Autowired constructor(
             throw AuthException("User does not exist")
     }
 
+    override fun deleteAllUsers() = authRepository.deleteAll()
 }

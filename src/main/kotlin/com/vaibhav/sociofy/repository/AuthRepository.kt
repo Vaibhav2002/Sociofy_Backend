@@ -1,10 +1,9 @@
 package com.vaibhav.sociofy.repository
 
-import com.vaibhav.sociofy.models.User
+import com.vaibhav.sociofy.models.entities.User
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
-import java.util.*
 
 @Repository
 interface AuthRepository : JpaRepository<User, Long> {
