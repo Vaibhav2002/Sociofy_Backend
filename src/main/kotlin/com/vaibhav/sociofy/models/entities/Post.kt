@@ -4,7 +4,6 @@ import javax.persistence.*
 
 @Entity(name = "post_table")
 data class Post(
-
     val userId: Long = 0,
     val description: String = "",
     val imageUrl: String = "",

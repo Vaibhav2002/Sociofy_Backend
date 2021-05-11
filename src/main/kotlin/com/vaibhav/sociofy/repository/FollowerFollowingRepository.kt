@@ -8,12 +8,13 @@ import org.springframework.stereotype.Repository
 @Repository
 interface FollowerFollowingRepository : JpaRepository<Follower_Following, Long>{
 
-    @Query("SELECT f.follower FROM follower_following_table f WHERE f.following = ?1")
+    @Query("SELECT f.followerId FROM follower_following_table f WHERE f.followingId = ?1")
     fun findAllFollowers(userId:Long):List<Long>
 
-    @Query("SELECT f.following FROM follower_following_table f WHERE f.follower = ?1")
+    @Query("SELECT f.followingId FROM follower_following_table f WHERE f.followerId = ?1")
     fun findAllFollowing(userId: Long):List<Long>
 
-    @Query("DELETE f FROM follower_following_table f WHERE f.follower = ?1 OR f.following = ?1")
-    fun deleteAllOfAUser(userId: Long)
+    fun deleteAllByFollowerId(userId: Long)
+
+    fun deleteAllByFollowingId(userId: Long)
 }

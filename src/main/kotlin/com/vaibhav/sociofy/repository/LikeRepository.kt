@@ -18,7 +18,7 @@ interface LikeRepository : JpaRepository<Like, Long> {
 
     fun existsByUserId(userId: Long):Boolean
 
-    @Query("COUNT(SELECT l.likeId FROM like_table WHERE l.postId = ?1)")
+    @Query("SELECT COUNT(l.likeId) FROM like_table l WHERE l.postId = ?1")
     fun getLikeCount(postId: Long):Long
 
 }

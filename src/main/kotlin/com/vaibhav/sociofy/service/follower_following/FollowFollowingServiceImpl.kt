@@ -13,8 +13,20 @@ class FollowFollowingServiceImpl @Autowired constructor(
 
     override fun getAllFollowers(userId: Long): List<Long> = repository.findAllFollowers(userId)
 
-    override fun deleteAllOfUser(userId: Long) = repository.deleteAllOfAUser(userId)
+    override fun deleteAllOfUser(userId: Long) {
+        deleteAllFollowersOfAUser(userId)
+        deleteAllFollowingOfAUser(userId)
+    }
+
     override fun deleteAll() = repository.deleteAll()
+
+    override fun deleteAllFollowersOfAUser(userId: Long) =
+        repository.deleteAllByFollowingId(userId)
+
+
+    override fun deleteAllFollowingOfAUser(userId: Long) =
+        repository.deleteAllByFollowerId(userId)
+
 
     override fun getAllFollowing(userId: Long): List<Long> = repository.findAllFollowing(userId)
 
@@ -23,6 +35,6 @@ class FollowFollowingServiceImpl @Autowired constructor(
     }
 
     override fun unfollowUser(followerId: Long, followingId: Long) {
-        repository.delete(Follower_Following(followerId,followingId))
+        repository.delete(Follower_Following(followerId, followingId))
     }
 }

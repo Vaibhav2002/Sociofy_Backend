@@ -6,9 +6,9 @@ import javax.persistence.*
 @Table(name = "follower_following_table")
 data class Follower_Following(
 
-    private val follower: Long,
+    private val followerId: Long,
 
-    private val following: Long,
+    private val followingId: Long,
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

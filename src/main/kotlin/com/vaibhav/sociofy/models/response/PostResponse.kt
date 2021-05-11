@@ -1,11 +1,13 @@
 package com.vaibhav.sociofy.models.response
 
-import com.vaibhav.sociofy.models.entities.Post
-
 data class PostResponse(
-    val postData: Post,
-    val username:String,
-    val user_profile_image:String,
-    val likedByMe:Boolean,
-    val likeCount:Long
+    val postId: Long = 0,
+    val userId: Long = 0,
+    val description: String = "",
+    val imageUrl: String = "",
+    val username: String,
+    val user_profile_image: String,
+    val likedByMe: Boolean,
+    val likeCount: Long,
+    val timeStamp: String = System.currentTimeMillis().toString(),
 )

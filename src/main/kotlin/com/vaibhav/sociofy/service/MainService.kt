@@ -1,12 +1,10 @@
 package com.vaibhav.sociofy.service
 
+import com.vaibhav.sociofy.models.entities.Notification
 import com.vaibhav.sociofy.models.entities.Post
 import com.vaibhav.sociofy.models.entities.SavedPost
 import com.vaibhav.sociofy.models.entities.User
-import com.vaibhav.sociofy.models.response.PostResponse
-import com.vaibhav.sociofy.models.response.Response
-import com.vaibhav.sociofy.models.response.SavedPostResponse
-import com.vaibhav.sociofy.models.response.UserDetailsResponse
+import com.vaibhav.sociofy.models.response.*
 import com.vaibhav.sociofy.service.auth.AuthServiceImpl
 import com.vaibhav.sociofy.service.follower_following.FollowFollowingServiceImpl
 import com.vaibhav.sociofy.service.likes.LikeServiceImpl
@@ -39,10 +37,25 @@ class MainService @Autowired constructor(
     Auth Service
      */
 
-    fun getCompleteUserDetails(user: User): UserDetailsResponse {
+    private fun getCompleteUserDetails(user: User): UserDetailsResponse {
         val followers = followFollowingServiceImpl.getAllFollowers(user.userId)
         val following = followFollowingServiceImpl.getAllFollowing(user.userId)
-        return UserDetailsResponse(userData = user, followers = followers, following = following)
+        return UserDetailsResponse(
+            userId = user.userId,
+            username = user.username,
+            profile_image_url = user.profile_img_url,
+            bio = user.bio,
+            followers = followers,
+            following = following
+        )
+    }
+
+    private fun getMinimalUserDetails(user: User): UserResponse {
+        return UserResponse(
+            userId = user.userId,
+            username = user.username,
+            profileImgUrl = user.profile_img_url
+        )
     }
 
     fun registerUser(username: String, email: String, password: String): Any {
@@ -74,7 +87,7 @@ class MainService @Autowired constructor(
             followFollowingServiceImpl.deleteAllOfUser(userId)
             Response.SuccessResponse(message = "User and all its data deleted")
         } catch (e: Exception) {
-            Response.ErrorResponse(message = "Failed to delete user and all its data")
+            Response.ErrorResponse(e.message.toString())
         }
     }
 
@@ -92,9 +105,9 @@ class MainService @Autowired constructor(
         }
     }
 
-    fun updateUserDetails(userId: Long, username: String, bio: String): Any {
+    fun updateUserDetails(userId: Long, username: String, bio: String, profileImageUrl: String): Any {
         return try {
-            val user = authServiceImpl.updateUserDetails(userId, username, bio)
+            val user = authServiceImpl.updateUserDetails(userId, username, bio, profileImageUrl)
             getCompleteUserDetails(user)
         } catch (e: Exception) {
             Response.ErrorResponse(message = e.message.toString())
@@ -102,7 +115,7 @@ class MainService @Autowired constructor(
 
     }
 
-    fun getUserByUserId(userId: Long): Any {
+    fun getUserDetailByUserId(userId: Long): Any {
         return try {
             val user = authServiceImpl.getUserById(userId)
             getCompleteUserDetails(user)
@@ -111,7 +124,15 @@ class MainService @Autowired constructor(
         }
     }
 
-    fun getUserByEmail(email: String): Any {
+    fun getUsersByUserIds(userIds: List<Long>): List<UserResponse> {
+        val users = authServiceImpl.getUsersByUserIds(userIds)
+        return users.map {
+            getMinimalUserDetails(it)
+        }
+    }
+
+
+    fun getUserDetailsByEmail(email: String): Any {
         return try {
             val user = authServiceImpl.getUserByEmail(email)
             getCompleteUserDetails(user)
@@ -120,7 +141,13 @@ class MainService @Autowired constructor(
         }
     }
 
-    fun getAllUsers() = authServiceImpl.getAllUsers()
+    fun getAllUsers(): List<UserResponse> {
+        val users = authServiceImpl.getAllUsers()
+        return users.map {
+            getMinimalUserDetails(it)
+        }
+
+    }
 
 
     /*
@@ -128,18 +155,29 @@ class MainService @Autowired constructor(
      */
 
 
-    fun getCompletePostResponseData(post: Post): PostResponse {
+    private fun getCompletePostResponseData(post: Post): PostResponse {
         val user = authServiceImpl.getUserById(post.userId)
         val likeCount = likeServiceImpl.getLikeCount(post.postId)
         val likedByMe = likeServiceImpl.isLikedByUser(post.userId)
         return PostResponse(
-            postData = post,
             username = user.username,
             user_profile_image = user.profile_img_url,
             likeCount = likeCount,
-            likedByMe = likedByMe
+            likedByMe = likedByMe,
+            postId = post.postId,
+            userId = user.userId,
+            description = post.description,
+            imageUrl = post.imageUrl,
+            timeStamp = post.timeStamp
         )
 
+    }
+
+    fun savePost(userId: Long, description: String, image_url: String): PostResponse {
+        var post = Post(userId, description, imageUrl = image_url)
+        post = postServiceImpl.insertIntoDb(post)
+        insertNotification(userId, post.postId)
+        return getCompletePostResponseData(post)
     }
 
     fun getAllPosts(): List<PostResponse> {
@@ -186,7 +224,7 @@ class MainService @Autowired constructor(
     SavedPost Service
      */
 
-    fun getCompleteSavedPostDetail(savedPost: SavedPost): SavedPostResponse {
+    private fun getCompleteSavedPostDetail(savedPost: SavedPost): SavedPostResponse {
         val post = postServiceImpl.getPost(savedPost.postId)
         val postResponse = getCompletePostResponseData(post)
         return SavedPostResponse(
@@ -234,11 +272,123 @@ class MainService @Autowired constructor(
     Like Service
      */
 
+
+    fun likePost(userId: Long, postId: Long): Response {
+        return try {
+            likeServiceImpl.likePost(userId, postId)
+            Response.SuccessResponse("Post liked successfully")
+        } catch (e: Exception) {
+            Response.ErrorResponse(message = "Failed to like post")
+        }
+    }
+
+    fun disLikePost(userId: Long, postId: Long): Response {
+        return try {
+            likeServiceImpl.dislikePost(userId, postId)
+            Response.SuccessResponse("Post disliked successfully")
+        } catch (e: Exception) {
+            Response.ErrorResponse(message = "Failed to dislike post")
+        }
+    }
+
+    fun getAllLikedPostIdsOfAUser(userId: Long) = likeServiceImpl.getAllLikedPostsIds(userId)
+
+    fun getAllLikersOfAPost(postId: Long) = likeServiceImpl.getAllLikersOfAPost(postId)
+
+    fun deleteAllLikesOfAUser(userId: Long): Response {
+        return try {
+            likeServiceImpl.deleteAllOfAUser(userId)
+            Response.SuccessResponse("All likes of this user deleted successfully")
+        } catch (e: Exception) {
+            Response.ErrorResponse(message = "Failed to delete likes of this user")
+        }
+    }
+
+    fun deleteAllLikes(): Response {
+        return try {
+            likeServiceImpl.deleteAll()
+            Response.SuccessResponse("All likes deleted successfully")
+        } catch (e: Exception) {
+            Response.ErrorResponse(message = "Failed to delete all likes")
+        }
+    }
     /*
     Notification Service
      */
 
+    private fun getCompleteNotificationDetails(notification: Notification): NotificationResponse {
+        val user = authServiceImpl.getUserById(notification.userId)
+        val post = postServiceImpl.getPost(notification.postId)
+        return NotificationResponse(
+            userId = user.userId,
+            postId = post.postId,
+            notificationId = notification.notificationId,
+            username = user.username,
+            postImageUrl = post.imageUrl,
+            timeStamp = notification.timeStamp
+        )
+    }
+
+    fun insertNotification(userId: Long, postId: Long) =
+        notificationServiceImpl.insertNotification(userId, postId)
+
+    fun getAllNotificationByUserIds(userIds: List<Long>) =
+        notificationServiceImpl.getAllNotificationByUserIds(userIds).map {
+            getCompleteNotificationDetails(it)
+        }
+
+    fun deleteNotificationByPostId(postId: Long): Response {
+        return try {
+            notificationServiceImpl.deleteNotificationByPostId(postId)
+            Response.SuccessResponse(message = "Notification deleted successfully")
+        } catch (e: Exception) {
+            Response.ErrorResponse(message = "Failed to delete notification")
+        }
+
+    }
+
+    fun deleteAllNotificationsByUserId(userId: Long): Response {
+        return try {
+            notificationServiceImpl.deleteAllNotificationsByUserId(userId)
+            Response.SuccessResponse(message = "All Notification of this user deleted successfully")
+        } catch (e: Exception) {
+            Response.ErrorResponse(message = "Failed to delete all notification of this user")
+        }
+    }
+
+    fun deleteAllNotifications(): Response {
+        return try {
+            notificationServiceImpl.deleteAllNotifications()
+            Response.SuccessResponse(message = "All Notifications deleted successfully")
+        } catch (e: Exception) {
+            Response.ErrorResponse(message = "Failed to delete all notification")
+        }
+    }
+
     /*
     Follow_Following Service
      */
+
+    fun followUser(followerUserId: Long, followingUserId: Long): Response {
+        return try {
+            followFollowingServiceImpl.followUser(followerUserId, followingUserId)
+            Response.SuccessResponse("User followed Successfully")
+        } catch (e: Exception) {
+            Response.ErrorResponse(message = "Failed to follow user")
+        }
+    }
+
+    fun unfollowUser(followerUserId: Long, followingUserId: Long): Response {
+        return try {
+            followFollowingServiceImpl.unfollowUser(followerUserId, followingUserId)
+            Response.SuccessResponse("User unfollowed Successfully")
+        } catch (e: Exception) {
+            Response.ErrorResponse(message = "Failed to unfollow user")
+        }
+    }
+
+    fun getAllFollowersOfUser(userId: Long) = followFollowingServiceImpl.getAllFollowers(userId)
+
+    fun getAllFollowingOfAUser(userId: Long) = followFollowingServiceImpl.getAllFollowing(userId)
+
 }

@@ -8,11 +8,11 @@ import javax.persistence.*
 data class User(
     val username: String = "",
     var password: String = "",
-    val email:String ="",
+    var email:String ="",
     val profile_img_url: String = "",
     val bio: String = "",
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var userId: Long = 0L,
 
-)
+    )

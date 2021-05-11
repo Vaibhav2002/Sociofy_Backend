@@ -10,4 +10,7 @@ interface AuthRepository : JpaRepository<User, Long> {
 
     @Query("SELECT u FROM user_table u WHERE u.email = ?1")
     fun getUserByEmail(email: String): User?
+
+    @Query("SELECT u FROM user_table u WHERE u.userId IN ?1")
+    fun findAllByIds(userIds:List<Long>):List<User>
 }

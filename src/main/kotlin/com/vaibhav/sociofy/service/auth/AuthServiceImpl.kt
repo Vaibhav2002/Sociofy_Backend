@@ -30,10 +30,15 @@ class AuthServiceImpl @Autowired constructor(
     override fun getUserByEmail(email: String) =
         authRepository.getUserByEmail(email) ?: throw AuthException("User does not exist")
 
-    override fun getUserById(userId: Long): User =
-        authRepository.findById(userId).orElseThrow {
-            AuthException("User does not exist")
-        }
+    override fun getUserById(userId: Long): User {
+        val user = authRepository.findById(userId)
+        return if(user.isPresent)
+            user.get()
+        else
+            throw AuthException("User does not exist")
+    }
+
+    override fun getUsersByUserIds(userIds: List<Long>) = authRepository.findAllByIds(userIds)
 
     override fun getAllUsers(): List<User> = authRepository.findAll()
 
@@ -47,9 +52,9 @@ class AuthServiceImpl @Autowired constructor(
 
     }
 
-    override fun updateUserDetails(userId: Long, username: String, bio: String): User {
+    override fun updateUserDetails(userId: Long, username: String, bio: String, profileImageUrl: String): User {
         val user = getUserById(userId)
-        val newUser = user.copy(username = username, bio = bio)
+        val newUser = user.copy(username = username, bio = bio, profile_img_url = profileImageUrl)
         return insertUserIntoDB(newUser)
     }
 

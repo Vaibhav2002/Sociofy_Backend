@@ -16,9 +16,11 @@ interface AuthService {
 
     fun getUserById(userId: Long): User
 
+    fun getUsersByUserIds(userIds:List<Long>):List<User>
+
     fun loginUser(email: String, password: String): User
 
-    fun updateUserDetails(userId: Long, username: String, bio: String): User
+    fun updateUserDetails(userId: Long, username: String, bio: String, profileImageUrl:String): User
 
     fun deleteUser(userId: Long)
 

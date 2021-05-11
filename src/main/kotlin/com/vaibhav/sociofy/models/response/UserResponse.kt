@@ -1,6 +1,6 @@
 package com.vaibhav.sociofy.models.response
 
-data class FollowerFollowingResponse(
+data class UserResponse(
     val userId:Long,
     val username:String,
     val profileImgUrl:String
