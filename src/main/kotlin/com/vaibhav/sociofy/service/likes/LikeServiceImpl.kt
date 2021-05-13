@@ -22,6 +22,7 @@ class LikeServiceImpl @Autowired constructor(private val likeRepository: LikeRep
 
     override fun deleteAllOfAUser(userId: Long) = likeRepository.deleteAllByUserId(userId)
     override fun deleteAll() = likeRepository.deleteAll()
+    override fun deleteAllByPostId(postId: Long) = likeRepository.deleteAllByPostId(postId)
 
     override fun getAllLikedPostsIds(userId: Long): List<Long> = likeRepository.findAllPostIdsByUserId(userId)
 

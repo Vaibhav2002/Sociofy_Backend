@@ -1,6 +1,7 @@
 package com.vaibhav.sociofy.service.auth
 
 import com.vaibhav.sociofy.models.entities.User
+import java.util.*
 
 interface AuthService {
 
@@ -12,7 +13,7 @@ interface AuthService {
 
     fun checkIfUserExistsById(userId: Long): Boolean
 
-    fun getUserByEmail(email: String): User
+    fun getUserByEmail(email: String): Optional<User>
 
     fun getUserById(userId: Long): User
 
@@ -22,7 +23,7 @@ interface AuthService {
 
     fun updateUserDetails(userId: Long, username: String, bio: String, profileImageUrl:String): User
 
-    fun deleteUser(userId: Long)
+    fun deleteUser(userId: Long):User
 
     fun deleteAllUsers()
 

@@ -13,6 +13,7 @@ import com.vaibhav.sociofy.service.post.PostServiceImpl
 import com.vaibhav.sociofy.service.savedPost.SavedPostServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import javax.transaction.Transactional
 
 
 /**
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service
 
 
 @Service
+@Transactional
 class MainService @Autowired constructor(
     private val authServiceImpl: AuthServiceImpl,
     private val postServiceImpl: PostServiceImpl,
@@ -35,18 +37,22 @@ class MainService @Autowired constructor(
 
     /*
     Auth Service
-     */
+    */
 
     private fun getCompleteUserDetails(user: User): UserDetailsResponse {
         val followers = followFollowingServiceImpl.getAllFollowers(user.userId)
         val following = followFollowingServiceImpl.getAllFollowing(user.userId)
+        val posts = user.posts.map {
+            getCompletePostResponseData(it)
+        }
         return UserDetailsResponse(
             userId = user.userId,
             username = user.username,
             profile_image_url = user.profile_img_url,
             bio = user.bio,
             followers = followers,
-            following = following
+            following = following,
+            posts = posts
         )
     }
 
@@ -79,8 +85,8 @@ class MainService @Autowired constructor(
 
     fun deleteUser(userId: Long): Any {
         return try {
-            authServiceImpl.deleteUser(userId)
-            postServiceImpl.deleteAllPostsOfAUser(userId)
+            val user = authServiceImpl.deleteUser(userId)
+            postServiceImpl.deleteAllPostsOfAUser(user)
             savedPostServiceImpl.deleteAllSavedPostsOfAUSer(userId)
             notificationServiceImpl.deleteAllNotificationsByUserId(userId)
             likeServiceImpl.deleteAllOfAUser(userId)
@@ -135,7 +141,7 @@ class MainService @Autowired constructor(
     fun getUserDetailsByEmail(email: String): Any {
         return try {
             val user = authServiceImpl.getUserByEmail(email)
-            getCompleteUserDetails(user)
+            getCompleteUserDetails(user.get())
         } catch (e: Exception) {
             Response.ErrorResponse(message = e.message.toString())
         }
@@ -156,16 +162,15 @@ class MainService @Autowired constructor(
 
 
     private fun getCompletePostResponseData(post: Post): PostResponse {
-        val user = authServiceImpl.getUserById(post.userId)
         val likeCount = likeServiceImpl.getLikeCount(post.postId)
-        val likedByMe = likeServiceImpl.isLikedByUser(post.userId)
+        val likedByMe = likeServiceImpl.isLikedByUser(post.gx)
         return PostResponse(
-            username = user.username,
-            user_profile_image = user.profile_img_url,
+            username = post.user.username,
+            user_profile_image = post.user.profile_img_url,
             likeCount = likeCount,
             likedByMe = likedByMe,
             postId = post.postId,
-            userId = user.userId,
+            userId = post.user.userId,
             description = post.description,
             imageUrl = post.imageUrl,
             timeStamp = post.timeStamp
@@ -173,11 +178,19 @@ class MainService @Autowired constructor(
 
     }
 
-    fun savePost(userId: Long, description: String, image_url: String): PostResponse {
-        var post = Post(userId, description, imageUrl = image_url)
-        post = postServiceImpl.insertIntoDb(post)
-        insertNotification(userId, post.postId)
-        return getCompletePostResponseData(post)
+    fun uploadPost(userId: Long, description: String, image_url: String): Any {
+        return try {
+            val user = authServiceImpl.getUserById(userId)
+            var post = Post(userId, description, imageUrl = image_url, user = user)
+            user.posts.add(post)
+            post = postServiceImpl.insertIntoDb(post)
+            authServiceImpl.insertUserIntoDB(user)
+            insertNotification(userId, post.postId)
+            getCompletePostResponseData(post)
+        } catch (e: Exception) {
+            Response.ErrorResponse(e.message.toString())
+        }
+
     }
 
     fun getAllPosts(): List<PostResponse> {
@@ -188,14 +201,17 @@ class MainService @Autowired constructor(
     }
 
     fun getAllPostByUserIds(userIds: List<Long>): List<PostResponse> {
-        val posts = postServiceImpl.getAllFeedPosts(userIds)
+        val users = authServiceImpl.getUsersByUserIds(userIds)
+        val posts = postServiceImpl.getAllFeedPosts(users)
         return posts.map {
             getCompletePostResponseData(it)
         }
     }
 
+
     fun getPostsOfUser(userId: Long): List<PostResponse> {
-        val posts = postServiceImpl.getPostsOfUser(userId)
+        val user = authServiceImpl.getUserById(userId)
+        val posts = postServiceImpl.getPostsOfUser(user)
         return posts.map {
             getCompletePostResponseData(it)
         }
@@ -218,7 +234,6 @@ class MainService @Autowired constructor(
             Response.ErrorResponse(message = "Failed to delete post")
         }
     }
-
 
     /*
     SavedPost Service

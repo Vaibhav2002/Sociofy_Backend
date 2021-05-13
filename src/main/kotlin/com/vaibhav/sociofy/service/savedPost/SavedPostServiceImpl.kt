@@ -29,6 +29,8 @@ class SavedPostServiceImpl @Autowired constructor(private val savedPostRepositor
         savedPostRepository.deleteAllByUserId(userId)
     }
 
+    override fun deleteAllByPostId(postId: Long) = savedPostRepository.deleteAllByPostId(postId)
+
     override fun deleteAllSavedPosts() = savedPostRepository.deleteAll()
 
     override fun getAllSavedPostsOfAUser(userId: Long): List<SavedPost> =

@@ -17,4 +17,5 @@ interface NotificationRepository : JpaRepository<Notification, Long>{
 
     fun deleteByPostId(postId: Long)
 
+
 }

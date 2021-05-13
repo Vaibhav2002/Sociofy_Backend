@@ -1,6 +1,7 @@
 package com.vaibhav.sociofy.service.post
 
 import com.vaibhav.sociofy.models.entities.Post
+import com.vaibhav.sociofy.models.entities.User
 
 interface PostService {
     //uploading
@@ -9,9 +10,9 @@ interface PostService {
     //fetching
     fun getAllPosts():List<Post>
 
-    fun getAllFeedPosts(userIds:List<Long>):List<Post>
+    fun getAllFeedPosts(users:List<User>):List<Post>
 
-    fun getPostsOfUser(userId:Long):List<Post>
+    fun getPostsOfUser(user:User):List<Post>
 
     fun getAllPostsByIds(postIds:List<Long>):List<Post>
 
@@ -23,5 +24,5 @@ interface PostService {
     //deleting
     fun deletePost(postId:Long)
     fun deleteAllPosts()
-    fun deleteAllPostsOfAUser(userId: Long)
+    fun deleteAllPostsOfAUser(user:User)
 }

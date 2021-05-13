@@ -3,6 +3,7 @@ package com.vaibhav.sociofy.service.post
 import com.google.common.truth.Truth.assertThat
 import com.vaibhav.sociofy.exceptions.PostException
 import com.vaibhav.sociofy.models.entities.Post
+import com.vaibhav.sociofy.models.entities.User
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.runner.RunWith
@@ -25,9 +26,10 @@ class PostServiceImplTest {
         private const val POST_IMAGE_URL = "hello"
         const val POST_DOES_NOT_EXIST_MESSAGE = "Post does not exist"
         val post = Post(
-            userId = USER_ID,
+            gx = USER_ID,
             description = POST_DESCRIPTION,
-            imageUrl = POST_IMAGE_URL
+            imageUrl = POST_IMAGE_URL,
+            user = User(userId = USER_ID)
         )
     }
 
@@ -57,16 +59,16 @@ class PostServiceImplTest {
 
     @Test
     fun getAllFeedPostsWhenUsersHaveNoPosts() {
-        val posts = postService.getPostsOfUser(USER_ID)
+        val posts = postService.getPostsOfUser(User(userId = USER_ID))
         assertThat(posts).isEmpty()
     }
 
     @Test
     fun getAllFeedPostsWhenUsersHavePosts() {
         postService.insertIntoDb(post)
-        postService.insertIntoDb(post.copy(userId = 2))
-        postService.insertIntoDb(post.copy(userId = 3))
-        val posts = postService.getAllFeedPosts(listOf(2, 3))
+        postService.insertIntoDb(post.copy(gx = 2))
+        postService.insertIntoDb(post.copy(gx = 3))
+        val posts = postService.getAllFeedPosts(listOf(User(userId = 2), User(userId = 3)))
         assertThat(posts).isNotEmpty()
     }
 
@@ -90,14 +92,14 @@ class PostServiceImplTest {
     fun getPostsOfUserWhenUserHasPosts() {
         postService.insertIntoDb(post)
         postService.insertIntoDb(post)
-        val posts = postService.getPostsOfUser(USER_ID)
+        val posts = postService.getPostsOfUser(User(userId = USER_ID))
         assertThat(posts).isNotEmpty()
 
     }
 
     @Test
     fun getPostsOfUserWhenUserHasNoPosts() {
-        val posts = postService.getPostsOfUser(USER_ID)
+        val posts = postService.getPostsOfUser(User(userId = USER_ID))
         assertThat(posts).isEmpty()
     }
 

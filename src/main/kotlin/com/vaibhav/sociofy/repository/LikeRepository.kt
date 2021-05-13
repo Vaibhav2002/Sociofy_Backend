@@ -16,6 +16,8 @@ interface LikeRepository : JpaRepository<Like, Long> {
 
     fun deleteAllByUserId(userId: Long)
 
+    fun deleteAllByPostId(postId: Long)
+
     fun existsByUserId(userId: Long):Boolean
 
     @Query("SELECT COUNT(l.likeId) FROM like_table l WHERE l.postId = ?1")

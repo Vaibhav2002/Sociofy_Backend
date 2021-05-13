@@ -2,9 +2,12 @@ package com.vaibhav.sociofy.service.post
 
 import com.vaibhav.sociofy.exceptions.PostException
 import com.vaibhav.sociofy.models.entities.Post
+import com.vaibhav.sociofy.models.entities.User
 import com.vaibhav.sociofy.repository.PostRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import javax.transaction.Transactional
+
 
 @Service
 class PostServiceImpl @Autowired constructor(private val postRepository: PostRepository) : PostService {
@@ -19,7 +22,7 @@ class PostServiceImpl @Autowired constructor(private val postRepository: PostRep
 
     override fun getAllPosts(): List<Post> = postRepository.findAll()
 
-    override fun getAllFeedPosts(userIds: List<Long>): List<Post> = postRepository.getAllFeedPosts(userIds)
+    override fun getAllFeedPosts(users:List<User>): List<Post> = postRepository.getAllFeedPosts(users)
 
     override fun deletePost(postId: Long) =
         if (checkIfPostExists(postId))
@@ -32,9 +35,9 @@ class PostServiceImpl @Autowired constructor(private val postRepository: PostRep
 
     override fun deleteAllPosts() = postRepository.deleteAll()
 
-    override fun deleteAllPostsOfAUser(userId: Long) = postRepository.deleteAllByUserId(userId)
+    override fun deleteAllPostsOfAUser(user:User) = postRepository.deleteAllByUser(user)
 
-    override fun getPostsOfUser(userId: Long): List<Post> = postRepository.getAllPostsOfUSer(userId)
+    override fun getPostsOfUser(user:User): List<Post> = postRepository.findAllByUser(user)
 
     override fun checkIfPostExists(postId: Long): Boolean = postRepository.existsById(postId)
 

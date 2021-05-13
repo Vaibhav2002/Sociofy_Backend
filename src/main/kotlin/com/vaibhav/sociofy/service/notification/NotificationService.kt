@@ -15,6 +15,8 @@ interface NotificationService {
     fun getAllNotificationByUserIds(userIds:List<Long>): List<Notification>
 
 
+
+
     //delete
     fun deleteNotificationByPostId(postId: Long)
 

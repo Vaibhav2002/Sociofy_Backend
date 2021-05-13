@@ -10,6 +10,8 @@ interface SavedPostService {
 
     fun deleteAllSavedPostsOfAUSer(userId: Long)
 
+    fun deleteAllByPostId(postId: Long)
+
     fun deleteAllSavedPosts()
 
     fun getAllSavedPostsOfAUser(userId: Long):List<SavedPost>

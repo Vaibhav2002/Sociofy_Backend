@@ -11,6 +11,8 @@ interface SavedPostRepository : JpaRepository<SavedPost, Long> {
     @Transactional
     fun deleteAllByUserId(userId: Long)
 
+    fun deleteAllByPostId(postId:Long)
+
 
     fun getAllByUserId(userId: Long): List<SavedPost>
 }

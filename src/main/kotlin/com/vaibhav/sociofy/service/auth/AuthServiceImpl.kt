@@ -6,8 +6,10 @@ import com.vaibhav.sociofy.repository.AuthRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import javax.transaction.Transactional
 
 @Service
+@Transactional
 class AuthServiceImpl @Autowired constructor(
     private val encoder: PasswordEncoder,
     private val authRepository: AuthRepository,
@@ -23,16 +25,16 @@ class AuthServiceImpl @Autowired constructor(
 
     override fun insertUserIntoDB(user: User) = authRepository.save(user)
 
-    override fun checkIfUserExistsByEmail(email: String) = authRepository.getUserByEmail(email) != null
+    override fun checkIfUserExistsByEmail(email: String) = authRepository.findByEmail(email).isPresent
 
     override fun checkIfUserExistsById(userId: Long) = authRepository.existsById(userId)
 
     override fun getUserByEmail(email: String) =
-        authRepository.getUserByEmail(email) ?: throw AuthException("User does not exist")
+        authRepository.findByEmail(email)
 
     override fun getUserById(userId: Long): User {
         val user = authRepository.findById(userId)
-        return if(user.isPresent)
+        return if (user.isPresent)
             user.get()
         else
             throw AuthException("User does not exist")
@@ -44,11 +46,15 @@ class AuthServiceImpl @Autowired constructor(
 
     override fun loginUser(email: String, password: String): User {
         val user = getUserByEmail(email)
-        println(user.toString())
-        if (encoder.matches(password, user.password))
-            return user;
-        else
-            throw AuthException("Password does not match")
+        println(user)
+        if (user.isPresent) {
+            println(user.toString())
+            if (encoder.matches(password, user.get().password))
+                return user.get();
+            else
+                throw AuthException("Password does not match")
+        } else throw AuthException("User does not exist")
+
 
     }
 
@@ -58,9 +64,11 @@ class AuthServiceImpl @Autowired constructor(
         return insertUserIntoDB(newUser)
     }
 
-    override fun deleteUser(userId: Long) {
+    override fun deleteUser(userId: Long): User {
+        val user = authRepository.findById(userId)
         if (checkIfUserExistsById(userId)) {
             authRepository.deleteById(userId)
+            return user.get()
         } else
             throw AuthException("User does not exist")
     }

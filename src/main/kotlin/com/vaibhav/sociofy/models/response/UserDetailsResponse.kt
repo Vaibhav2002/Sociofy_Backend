@@ -9,4 +9,5 @@ data class UserDetailsResponse(
     val bio:String,
     val followers:List<Long>,
     val following:List<Long>,
+    val posts:List<PostResponse>
 )

@@ -14,6 +14,8 @@ interface LikeService {
 
     fun deleteAll()
 
+    fun deleteAllByPostId(postId: Long)
+
     fun isLikedByUser(userId: Long):Boolean
 
     fun getLikeCount(postId: Long):Long

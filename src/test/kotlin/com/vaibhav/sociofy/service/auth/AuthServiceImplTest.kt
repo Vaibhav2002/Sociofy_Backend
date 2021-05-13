@@ -44,11 +44,7 @@ class AuthServiceImplTest {
         password: String = PASSWORD
     ): User {
         return serviceImpl.registerUser(
-            User(
-                username,
-                email,
-                password,
-            )
+            USERNAME, EMAIL, PASSWORD
         )
     }
 
@@ -81,7 +77,8 @@ class AuthServiceImplTest {
 
     @Test
     fun login_when_user_exists() {
-        val user = serviceImpl.registerUser(user)
+        serviceImpl.registerUser(USERNAME, EMAIL, PASSWORD)
+        val user = serviceImpl.loginUser(EMAIL, PASSWORD)
         println(user.toString())
         assertDoesNotThrow {
             serviceImpl.loginUser(
@@ -93,7 +90,7 @@ class AuthServiceImplTest {
 
     @Test
     fun login_when_password_is_wrong() {
-        serviceImpl.registerUser(user)
+        serviceImpl.registerUser(USERNAME, EMAIL, PASSWORD)
         val exception = assertThrows<AuthException>() {
             serviceImpl.loginUser(email = EMAIL, password = "vaibhav32323")
         }
@@ -103,16 +100,14 @@ class AuthServiceImplTest {
 
     @Test
     fun get_user_by_email_when_user_does_not_exist() {
-        val exception = assertThrows<AuthException> {
-            serviceImpl.getUserByEmail(EMAIL)
-        }
-        assertThat(exception.message).isEqualTo(USER_DOES_NOT_EXIST_MESSAGE)
+        val user = serviceImpl.getUserByEmail(EMAIL)
+        assertThat(user.isPresent).isFalse()
 
     }
 
     @Test
     fun get_user_by_email_when_user_exists() {
-        serviceImpl.registerUser(user)
+        serviceImpl.registerUser(USERNAME, EMAIL, PASSWORD)
         val user = serviceImpl.getUserByEmail(EMAIL)
         assertThat(user).isNotNull()
     }
@@ -153,7 +148,7 @@ class AuthServiceImplTest {
     @Test
     fun update_user_when_user_does_not_exist() {
         val exception = assertThrows<AuthException> {
-            serviceImpl.updateUserDetails(1, "Vaibhav3233", BIO)
+            serviceImpl.updateUserDetails(1, "Vaibhav3233", BIO, profileImageUrl = "")
         }
         assertThat(exception.message).isEqualTo(USER_DOES_NOT_EXIST_MESSAGE)
     }
@@ -162,7 +157,7 @@ class AuthServiceImplTest {
     fun update_user_when_user_does_exist() {
         val user = insertUserIntoDb()
         assertDoesNotThrow {
-            serviceImpl.updateUserDetails(user.userId, "Vaibahv3233", "Badass Coder")
+            serviceImpl.updateUserDetails(user.userId, "Vaibahv3233", "Badass Coder", profileImageUrl = "")
         }
     }
 }
