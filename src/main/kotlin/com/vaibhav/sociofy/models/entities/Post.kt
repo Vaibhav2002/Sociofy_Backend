@@ -6,7 +6,6 @@ import javax.persistence.*
 @Table(name = "post_table")
 @Entity(name = "post_table")
 data class Post(
-    val gx: Long = 0,
     val description: String = "",
     val imageUrl: String = "",
     val timeStamp: String = System.currentTimeMillis().toString(),
@@ -18,7 +17,19 @@ data class Post(
     @JsonIgnore
     @ManyToOne(targetEntity = User::class, fetch = FetchType.LAZY)
     @JoinColumn()
-    var user: User = User()
+    var user: User = User(),
+
+    @JsonIgnore
+    @OneToMany(
+        targetEntity = SavedPost::class,
+        fetch = FetchType.LAZY,
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true,
+        mappedBy = "user"
+    )
+    val savedPosts: MutableList<SavedPost> = mutableListOf()
+
+
 ) {
 
 }

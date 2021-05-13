@@ -4,7 +4,7 @@ import com.vaibhav.sociofy.models.entities.SavedPost
 
 interface SavedPostService {
 
-    fun savePost(userId:Long, postId:Long): SavedPost
+    fun savePost(savedPost: SavedPost): SavedPost
 
     fun deleteSavedPost(savedPostId:Long)
 

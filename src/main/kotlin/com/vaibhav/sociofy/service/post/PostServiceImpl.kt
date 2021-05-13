@@ -10,6 +10,7 @@ import javax.transaction.Transactional
 
 
 @Service
+@Transactional
 class PostServiceImpl @Autowired constructor(private val postRepository: PostRepository) : PostService {
 
     companion object{
