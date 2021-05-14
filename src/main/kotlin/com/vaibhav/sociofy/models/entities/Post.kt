@@ -25,7 +25,7 @@ data class Post(
         fetch = FetchType.LAZY,
         cascade = [CascadeType.ALL],
         orphanRemoval = true,
-        mappedBy = "user"
+        mappedBy = "post"
     )
     val savedPosts: MutableList<SavedPost> = mutableListOf()
 

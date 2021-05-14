@@ -87,15 +87,10 @@ class MainService @Autowired constructor(
 
     fun deleteUser(userId: Long): Any {
         return try {
-            val user = authServiceImpl.deleteUser(userId)
-            postServiceImpl.deleteAllPostsOfAUser(user)
-            savedPostServiceImpl.deleteAllSavedPostsOfAUSer(userId)
-            notificationServiceImpl.deleteAllNotificationsByUserId(userId)
-            likeServiceImpl.deleteAllOfAUser(userId)
-            followFollowingServiceImpl.deleteAllOfUser(userId)
+            authServiceImpl.deleteUser(userId)
             Response.SuccessResponse(message = "User and all its data deleted")
         } catch (e: AuthException) {
-            Response.ErrorResponse(e.message.toString())
+            Response.ErrorResponse(e.message)
         }
     }
 
@@ -240,8 +235,7 @@ class MainService @Autowired constructor(
      */
 
     private fun getCompleteSavedPostDetail(savedPost: SavedPost): SavedPostResponse {
-        val post = postServiceImpl.getPost(savedPost.post.postId)
-        val postResponse = getCompletePostResponseData(post)
+        val postResponse = getCompletePostResponseData(savedPost.post)
         return SavedPostResponse(
             savedPostData = postResponse,
             saveId = savedPost.saveId,
@@ -256,7 +250,7 @@ class MainService @Autowired constructor(
         }
     }
 
-    fun deleteSavedPost(savedPostId: Long): Any {
+    fun deleteSavedPost(savedPostId: Long): Response {
         return try {
             savedPostServiceImpl.deleteSavedPost(savedPostId)
             Response.SuccessResponse(message = "SavedPost deleted successfully")
@@ -265,7 +259,7 @@ class MainService @Autowired constructor(
         }
     }
 
-    fun deleteAllSavedPostsOfAUser(userId: Long): Any {
+    fun deleteAllSavedPostsOfAUser(userId: Long): Response {
         return try {
             savedPostServiceImpl.deleteAllSavedPostsOfAUSer(userId)
             Response.SuccessResponse(message = "All SavedPost deleted successfully")
@@ -278,7 +272,7 @@ class MainService @Autowired constructor(
         return try {
             val user = authServiceImpl.getUserById(userId)
             val post = postServiceImpl.getPost(postId)
-            val savedPost = savedPostServiceImpl.savePost(SavedPost(user = user,post = post))
+            val savedPost = savedPostServiceImpl.savePost(SavedPost(user = user, post = post))
             getCompleteSavedPostDetail(savedPost)
         } catch (e: SavedPostException) {
             Response.ErrorResponse(message = "Failed to delete saved post")

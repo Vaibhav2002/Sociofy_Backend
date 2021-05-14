@@ -4,6 +4,9 @@ import com.google.common.truth.Truth.assertThat
 import com.vaibhav.sociofy.exceptions.PostException
 import com.vaibhav.sociofy.models.entities.Post
 import com.vaibhav.sociofy.models.entities.User
+import com.vaibhav.sociofy.service.auth.AuthServiceImpl
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.runner.RunWith
@@ -26,27 +29,49 @@ class PostServiceImplTest {
         private const val POST_IMAGE_URL = "hello"
         const val POST_DOES_NOT_EXIST_MESSAGE = "Post does not exist"
         val post = Post(
-            gx = USER_ID,
             description = POST_DESCRIPTION,
             imageUrl = POST_IMAGE_URL,
-            user = User(userId = USER_ID)
         )
     }
 
     @Autowired
     private lateinit var postService: PostServiceImpl
 
+    @Autowired
+    private lateinit var authService: AuthServiceImpl
+
+    private lateinit var user: User
+    private lateinit var user2: User
+    private lateinit var user3: User
+
+    @BeforeEach
+    fun insertAllUsers() {
+        println("inBefore")
+        user = authService.registerUser("", "op", "HEll Yeah")
+        user2 = authService.registerUser("", "nigger", "HEll Yeah")
+        user3 = authService.registerUser("", "lmfao", "HEll Yeah")
+        println(user)
+        println(user2)
+        println(user3)
+    }
+
+    @AfterEach
+    fun deleteAllUsers() {
+        println("inAfter")
+        authService.deleteAllUsers()
+    }
+
     @Test
     fun insertIntoDb() {
-        val post = postService.insertIntoDb(post)
+        val post = postService.insertIntoDb(post.copy(user = user))
         assertThat(postService.checkIfPostExists(post.postId)).isTrue()
 
     }
 
     @Test
     fun getAllPostsWhenDbIsNotEmpty() {
-        postService.insertIntoDb(post)
-        postService.insertIntoDb(post)
+        postService.insertIntoDb(post.copy(user = user))
+        postService.insertIntoDb(post.copy(user = user2))
         val posts = postService.getAllPosts()
         assertThat(posts).isNotEmpty()
     }
@@ -59,22 +84,22 @@ class PostServiceImplTest {
 
     @Test
     fun getAllFeedPostsWhenUsersHaveNoPosts() {
-        val posts = postService.getPostsOfUser(User(userId = USER_ID))
+        val posts = postService.getPostsOfUser(user)
         assertThat(posts).isEmpty()
     }
 
     @Test
     fun getAllFeedPostsWhenUsersHavePosts() {
-        postService.insertIntoDb(post)
-        postService.insertIntoDb(post.copy(gx = 2))
-        postService.insertIntoDb(post.copy(gx = 3))
-        val posts = postService.getAllFeedPosts(listOf(User(userId = 2), User(userId = 3)))
+        postService.insertIntoDb(post.copy(user = user))
+        postService.insertIntoDb(post.copy(user = user2))
+        postService.insertIntoDb(post.copy(user = user3))
+        val posts = postService.getAllFeedPosts(listOf<User>(user2, user3))
         assertThat(posts).isNotEmpty()
     }
 
     @Test
     fun deletePostWhenPostExists() {
-        val post = postService.insertIntoDb(post)
+        val post = postService.insertIntoDb(post.copy(user = user))
         postService.deletePost(post.postId)
         assertThat(postService.checkIfPostExists(post.postId)).isFalse()
 
@@ -90,22 +115,22 @@ class PostServiceImplTest {
 
     @Test
     fun getPostsOfUserWhenUserHasPosts() {
-        postService.insertIntoDb(post)
-        postService.insertIntoDb(post)
-        val posts = postService.getPostsOfUser(User(userId = USER_ID))
+        postService.insertIntoDb(post.copy(user = user))
+        postService.insertIntoDb(post.copy(user = user))
+        val posts = postService.getPostsOfUser(user)
         assertThat(posts).isNotEmpty()
 
     }
 
     @Test
     fun getPostsOfUserWhenUserHasNoPosts() {
-        val posts = postService.getPostsOfUser(User(userId = USER_ID))
+        val posts = postService.getPostsOfUser(user)
         assertThat(posts).isEmpty()
     }
 
     @Test
     fun checkIfPostExistsWhenItDoes() {
-        val post = postService.insertIntoDb(post)
+        val post = postService.insertIntoDb(post.copy(user = user))
         val exists = postService.checkIfPostExists(post.postId)
         assertThat(exists).isTrue()
     }

@@ -7,18 +7,22 @@ import javax.persistence.*
 @Table(name = "saved_post_table")
 data class SavedPost(
 
-    val timeStamp: Long = System.currentTimeMillis(),
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val saveId: Long = 0,
 
     @JsonIgnore
     @ManyToOne(targetEntity = User::class, fetch = FetchType.LAZY)
     @JoinColumn
     val user: User = User(),
 
-    @ManyToOne(targetEntity = Post::class,cascade = [CascadeType.ALL],fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = Post::class,fetch = FetchType.LAZY)
     @JoinColumn
-    val post:Post = Post()
+    val post:Post = Post(),
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val saveId: Long = 0,
+
+
+
+    val timeStamp: Long = System.currentTimeMillis(),
+
 )

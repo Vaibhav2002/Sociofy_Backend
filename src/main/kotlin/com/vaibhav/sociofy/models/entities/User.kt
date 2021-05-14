@@ -13,14 +13,15 @@ data class User(
     var email: String = "",
     val profile_img_url: String = "",
     val bio: String = "",
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var userId: Long = 0L,
 
     @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, mappedBy = "user")
-    var posts:MutableList<Post>  = mutableListOf(),
+    var posts: MutableList<Post> = mutableListOf(),
 
     @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, mappedBy = "user")
-    var savedPosts:MutableList<SavedPost> = mutableListOf()
+    var savedPosts: MutableList<SavedPost> = mutableListOf()
 )

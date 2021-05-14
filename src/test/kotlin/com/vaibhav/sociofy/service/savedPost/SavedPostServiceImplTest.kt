@@ -2,6 +2,10 @@ package com.vaibhav.sociofy.service.savedPost
 
 import com.google.common.truth.Truth.assertThat
 import com.vaibhav.sociofy.exceptions.SavedPostException
+import com.vaibhav.sociofy.models.entities.Post
+import com.vaibhav.sociofy.models.entities.SavedPost
+import com.vaibhav.sociofy.service.auth.AuthServiceImpl
+import com.vaibhav.sociofy.service.post.PostServiceImpl
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.runner.RunWith
@@ -28,9 +32,17 @@ class SavedPostServiceImplTest {
     @Autowired
     private lateinit var service: SavedPostServiceImpl
 
+    @Autowired
+    private lateinit var authService: AuthServiceImpl
+
+    @Autowired
+    private lateinit var postService: PostServiceImpl
+
     @Test
     fun savePost() {
-        val saved = service.savePost(USER_ID, POST_ID)
+        val user = authService.registerUser("", "", "Hello")
+        val post = postService.insertIntoDb(Post(user = user))
+        val saved = service.savePost(SavedPost(user, post))
         val allSaved = service.checkIfSavedPostExists(saved.saveId)
         println(allSaved)
         assertThat(allSaved).isTrue()
@@ -47,7 +59,9 @@ class SavedPostServiceImplTest {
 
     @Test
     fun deleteSavedPostWhenSavedPostDoesExist() {
-        val saved = service.savePost(USER_ID, POST_ID)
+        val user = authService.registerUser("", "", "Hello")
+        val post = postService.insertIntoDb(Post(user = user))
+        val saved = service.savePost(SavedPost(user, post))
         service.deleteSavedPost(saved.saveId)
         val doesItExist = service.checkIfSavedPostExists(saved.saveId)
         assertThat(doesItExist).isFalse()
@@ -55,19 +69,30 @@ class SavedPostServiceImplTest {
 
     @Test
     fun deleteAllSavedPostsOfAUSer() {
-        service.savePost(USER_ID, POST_ID)
-        service.savePost(USER_ID, 2)
-        service.savePost(USER_ID, 3)
+        val user = authService.registerUser("", "", "Hello")
+        val post = postService.insertIntoDb(Post(user = user))
+        val post2 = postService.insertIntoDb(Post(user = user))
+        val post3 = postService.insertIntoDb(Post(user = user))
+        service.savePost(SavedPost(user, post))
+        service.savePost(SavedPost(user, post2))
+        service.savePost(SavedPost(user, post3))
         service.deleteAllSavedPostsOfAUSer(USER_ID)
         assertThat(service.getAllSavedPostsOfAUser(USER_ID)).isEmpty()
     }
 
     @Test
     fun getAllSavedPostsOfAUserWhenThereAreSavedPosts() {
-        service.savePost(USER_ID, POST_ID)
-        service.savePost(USER_ID,2)
-        service.savePost(USER_ID, 3)
-        val allposts = service.getAllSavedPostsOfAUser(USER_ID)
+        val user = authService.registerUser("", "", "Hello")
+        val post = postService.insertIntoDb(Post(user = user))
+        val post2 = postService.insertIntoDb(Post(user = user))
+        val post3 = postService.insertIntoDb(Post(user = user))
+        val user2 = authService.registerUser(",", ",", "OhMahGo")
+        service.savePost(SavedPost(user2, post))
+        service.savePost(SavedPost(user2, post2))
+        service.savePost(SavedPost(user2, post3))
+        service.savePost(SavedPost(user, post))
+        val allposts = service.getAllSavedPostsOfAUser(user2.userId)
+        println(allposts.size)
         assertThat(allposts).isNotEmpty()
     }
 
@@ -86,8 +111,10 @@ class SavedPostServiceImplTest {
 
     @Test
     fun checkIfSavedPostExistsWhenItDoes() {
-        val post = service.savePost(USER_ID, POST_ID)
-        val exists = service.checkIfSavedPostExists(post.saveId)
+        val user = authService.registerUser("", "", "Hello")
+        val post = postService.insertIntoDb(Post(user = user))
+        val saved = service.savePost(SavedPost(user,post))
+        val exists = service.checkIfSavedPostExists(saved.saveId)
         assertThat(exists).isTrue()
 
     }
