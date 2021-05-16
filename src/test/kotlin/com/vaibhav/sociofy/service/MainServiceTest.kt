@@ -90,7 +90,6 @@ class MainServiceTest {
 
     @Test
     fun getPostsOfUser() {
-
         val user = authServiceImpl.registerUser(USERNAME, EMAIL, PASSWORD)
         println(user)
         val post = postServiceImpl.insertIntoDb(Post(user = user))

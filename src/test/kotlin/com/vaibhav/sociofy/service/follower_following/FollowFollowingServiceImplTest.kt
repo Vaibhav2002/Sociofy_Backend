@@ -1,6 +1,9 @@
 package com.vaibhav.sociofy.service.follower_following
 
 import com.google.common.truth.Truth.assertThat
+import com.vaibhav.sociofy.models.entities.User
+import com.vaibhav.sociofy.service.auth.AuthService
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -18,45 +21,55 @@ import org.springframework.test.context.junit4.SpringRunner
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 class FollowFollowingServiceImplTest {
 
-    companion object{
-        const val iD1 = 1L
-        const val iD2 = 2L
-    }
 
     @Autowired
     private lateinit var service:FollowFollowingServiceImpl
 
+    @Autowired
+    private lateinit var authService:AuthService
+
+    private lateinit var user1:User
+    private lateinit var user2:User
+    private lateinit var user3:User
+
+
+    @BeforeEach
+    fun insertAllUsers(){
+        user1 =authService.registerUser("","hello","wtaf")
+        user2 =authService.registerUser("","helloNigga","wtaf")
+        user3 =authService.registerUser("","helloBomt","wtaf")
+    }
+
     @Test
     fun getAllFollowersWhenThereAreNoFollowers() {
-        val followers = service.getAllFollowers(iD2)
+        val followers = service.getAllFollowers(user1.userId)
         println(followers)
         assertThat(followers).isEmpty()
     }
 
     @Test
     fun getAllFollowersWhenThereAreFollowers() {
-        service.followUser(iD1, iD2)
-        service.followUser(3, iD2)
-        service.followUser(5, iD1)
-        val followers = service.getAllFollowers(iD2)
+        service.followUser(user1,user2)
+        service.followUser(user3,user1)
+        service.followUser(user2,user1)
+        val followers = service.getAllFollowers(user1.userId)
         println(followers)
         assertThat(followers).isNotEmpty()
     }
 
     @Test
     fun getAllFollowingWhenThereAreFollowing() {
-        val following = service.getAllFollowing(iD1)
+        val following = service.getAllFollowing(user1.userId)
         println(following)
         assertThat(following).isEmpty()
     }
 
     @Test
     fun getAllFollowingWhenThereAreNoFollowing() {
-
-        service.followUser(iD1, iD2)
-        service.followUser(3, iD1)
-        service.followUser(iD1,5)
-        val following = service.getAllFollowing(iD1)
+        service.followUser(user1,user2)
+        service.followUser(user3,user1)
+        service.followUser(user3,user1)
+        val following = service.getAllFollowing(user3.userId)
         println(following)
         assertThat(following).isNotEmpty()
     }
@@ -64,14 +77,14 @@ class FollowFollowingServiceImplTest {
     @Test
     fun followUser() {
         assertDoesNotThrow {
-            service.followUser(iD1, iD2)
+            service.followUser(user1, user2)
         }
     }
 
     @Test
     fun unfollowUser() {
         assertDoesNotThrow {
-            service.unfollowUser(iD1, iD2)
+            service.unfollowUser(user1, user2)
         }
     }
 }

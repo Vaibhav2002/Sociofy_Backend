@@ -1,6 +1,7 @@
 package com.vaibhav.sociofy.service
 
 import com.vaibhav.sociofy.exceptions.AuthException
+import com.vaibhav.sociofy.exceptions.LikeException
 import com.vaibhav.sociofy.exceptions.SavedPostException
 import com.vaibhav.sociofy.models.entities.Notification
 import com.vaibhav.sociofy.models.entities.Post
@@ -42,8 +43,16 @@ class MainService @Autowired constructor(
     */
 
     private fun getCompleteUserDetails(user: User): UserDetailsResponse {
-        val followers = followFollowingServiceImpl.getAllFollowers(user.userId)
-        val following = followFollowingServiceImpl.getAllFollowing(user.userId)
+        val followers = user.followers.filter {
+            it.following.userId == user.userId
+        }.map {
+            it.follower.userId
+        }
+        val following = user.following.filter {
+            it.follower.userId == user.userId
+        }.map {
+            it.following.userId
+        }
         val posts = user.posts.map {
             getCompletePostResponseData(it)
         }
@@ -159,13 +168,12 @@ class MainService @Autowired constructor(
 
 
     private fun getCompletePostResponseData(post: Post): PostResponse {
-        val likeCount = likeServiceImpl.getLikeCount(post.postId)
-        val likedByMe = likeServiceImpl.isLikedByUser(post.user.userId)
+        val likeCount = post.likes.size.toLong()
         return PostResponse(
             username = post.user.username,
             user_profile_image = post.user.profile_img_url,
             likeCount = likeCount,
-            likedByMe = likedByMe,
+            likes = post.likes.map { it.user.userId },
             postId = post.postId,
             userId = post.user.userId,
             description = post.description,
@@ -286,23 +294,27 @@ class MainService @Autowired constructor(
 
     fun likePost(userId: Long, postId: Long): Response {
         return try {
-            likeServiceImpl.likePost(userId, postId)
+            val user = authServiceImpl.getUserById(userId)
+            val post = postServiceImpl.getPost(postId)
+            likeServiceImpl.likePost(user, post)
             Response.SuccessResponse("Post liked successfully")
-        } catch (e: Exception) {
-            Response.ErrorResponse(message = "Failed to like post")
+        } catch (e: LikeException) {
+            Response.ErrorResponse(message = e.message)
         }
     }
 
     fun disLikePost(userId: Long, postId: Long): Response {
         return try {
-            likeServiceImpl.dislikePost(userId, postId)
+            likeServiceImpl.dislikePost(userId,postId)
             Response.SuccessResponse("Post disliked successfully")
-        } catch (e: Exception) {
-            Response.ErrorResponse(message = "Failed to dislike post")
+        } catch (e: LikeException) {
+            Response.ErrorResponse(message = e.message)
         }
     }
 
-    fun getAllLikedPostIdsOfAUser(userId: Long) = likeServiceImpl.getAllLikedPostsIds(userId)
+    fun getAllLikedPostsOfAUser(userId: Long) = likeServiceImpl.getAllLikedPosts(userId).map {
+        getCompletePostResponseData(it)
+    }
 
     fun getAllLikersOfAPost(postId: Long) = likeServiceImpl.getAllLikersOfAPost(postId)
 
@@ -310,8 +322,17 @@ class MainService @Autowired constructor(
         return try {
             likeServiceImpl.deleteAllOfAUser(userId)
             Response.SuccessResponse("All likes of this user deleted successfully")
-        } catch (e: Exception) {
-            Response.ErrorResponse(message = "Failed to delete likes of this user")
+        } catch (e: LikeException) {
+            Response.ErrorResponse(message = e.message)
+        }
+    }
+
+    fun deleteAllLikesOfAPost(postId: Long): Response {
+        return try {
+            likeServiceImpl.deleteAllByPostId(postId)
+            Response.SuccessResponse("All likes of this post deleted successfully")
+        } catch (e: LikeException) {
+            Response.ErrorResponse(message = e.message)
         }
     }
 
@@ -319,8 +340,8 @@ class MainService @Autowired constructor(
         return try {
             likeServiceImpl.deleteAll()
             Response.SuccessResponse("All likes deleted successfully")
-        } catch (e: Exception) {
-            Response.ErrorResponse(message = "Failed to delete all likes")
+        } catch (e: LikeException) {
+            Response.ErrorResponse(message = e.message)
         }
     }
     /*
@@ -382,7 +403,9 @@ class MainService @Autowired constructor(
 
     fun followUser(followerUserId: Long, followingUserId: Long): Response {
         return try {
-            followFollowingServiceImpl.followUser(followerUserId, followingUserId)
+            val follower = authServiceImpl.getUserById(followerUserId)
+            val following =authServiceImpl.getUserById(followingUserId)
+            followFollowingServiceImpl.followUser(follower, following)
             Response.SuccessResponse("User followed Successfully")
         } catch (e: Exception) {
             Response.ErrorResponse(message = "Failed to follow user")
@@ -391,7 +414,9 @@ class MainService @Autowired constructor(
 
     fun unfollowUser(followerUserId: Long, followingUserId: Long): Response {
         return try {
-            followFollowingServiceImpl.unfollowUser(followerUserId, followingUserId)
+            val follower = authServiceImpl.getUserById(followerUserId)
+            val following =authServiceImpl.getUserById(followingUserId)
+            followFollowingServiceImpl.unfollowUser(follower, following)
             Response.SuccessResponse("User unfollowed Successfully")
         } catch (e: Exception) {
             Response.ErrorResponse(message = "Failed to unfollow user")

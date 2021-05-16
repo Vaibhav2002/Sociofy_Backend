@@ -1,15 +1,24 @@
 package com.vaibhav.sociofy.models.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.*
+
+
 
 @Entity(name = "like_table")
 @Table(name = "like_table")
 data class Like(
-    private val userId:Long,
 
-    private val postId:Long,
+    @JsonIgnore
+    @ManyToOne(targetEntity = User::class, fetch = FetchType.LAZY)
+    @JoinColumn
+    val user:User,
+
+    @ManyToOne(targetEntity = Post::class, fetch = FetchType.LAZY)
+    @JoinColumn
+    val post:Post,
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val likeId:Long = 0
+    val likeId:Long = 0
 )

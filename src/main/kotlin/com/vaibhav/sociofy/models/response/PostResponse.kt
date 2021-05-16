@@ -7,7 +7,7 @@ data class PostResponse(
     val imageUrl: String = "",
     val username: String,
     val user_profile_image: String,
-    val likedByMe: Boolean,
+    val likes: List<Long>,
     val likeCount: Long,
     val timeStamp: String = System.currentTimeMillis().toString(),
 )

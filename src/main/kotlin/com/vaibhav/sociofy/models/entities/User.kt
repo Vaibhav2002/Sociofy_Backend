@@ -17,11 +17,22 @@ data class User(
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var userId: Long = 0L,
+    val userId: Long = 0L,
 
     @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, mappedBy = "user")
-    var posts: MutableList<Post> = mutableListOf(),
+    val posts: MutableList<Post> = mutableListOf(),
 
     @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, mappedBy = "user")
-    var savedPosts: MutableList<SavedPost> = mutableListOf()
+    val savedPosts: MutableList<SavedPost> = mutableListOf(),
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, mappedBy = "user")
+    val likes:MutableList<Like> = mutableListOf(),
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, mappedBy = "follower")
+    val followers:MutableList<Follower_Following> = mutableListOf(),
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, mappedBy = "following")
+    val following:MutableList<Follower_Following> = mutableListOf()
+
+
 )

@@ -21,15 +21,16 @@ data class Post(
 
     @JsonIgnore
     @OneToMany(
-        targetEntity = SavedPost::class,
         fetch = FetchType.LAZY,
         cascade = [CascadeType.ALL],
         orphanRemoval = true,
         mappedBy = "post"
     )
-    val savedPosts: MutableList<SavedPost> = mutableListOf()
+    val savedPosts: MutableList<SavedPost> = mutableListOf(),
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, mappedBy = "post")
+    val likes: MutableList<Like> = mutableListOf()
 
 
-) {
-
-}
+)

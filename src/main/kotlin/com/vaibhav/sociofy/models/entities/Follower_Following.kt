@@ -1,17 +1,22 @@
 package com.vaibhav.sociofy.models.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.*
 
 @Entity(name = "follower_following_table")
 @Table(name = "follower_following_table")
 data class Follower_Following(
 
-    private val followerId: Long,
+    @ManyToOne(targetEntity = User::class, fetch = FetchType.LAZY)
+    @JoinColumn
+    val follower: User,
 
-    private val followingId: Long,
+    @ManyToOne(targetEntity = User::class, fetch = FetchType.LAZY)
+    @JoinColumn
+    val following: User,
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id:Long = 0L
+    private val id: Long = 0L
 
 )
