@@ -8,5 +8,5 @@ data class NotificationResponse(
     val notificationId:Long,
     val username:String,
     val postImageUrl:String,
-    val timeStamp:String
+    val timeStamp:String = System.currentTimeMillis().toString()
 )
