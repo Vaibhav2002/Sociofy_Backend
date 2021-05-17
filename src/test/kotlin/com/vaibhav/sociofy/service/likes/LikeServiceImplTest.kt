@@ -64,15 +64,15 @@ class LikeServiceImplTest {
     @Test
     fun likePost() {
         val like = service.likePost(user1, post3)
-        assertThat(service.exists(like)).isTrue()
+        assertThat(service.exists(like.user.userId,like.post.postId)).isTrue()
 
     }
 
     @Test
     fun dislikePost() {
         val like = service.likePost(user1,post3)
-        service.dislikePost(like)
-        assertThat(service.exists(like)).isFalse()
+        service.dislikePost(like.user.userId,like.post.postId)
+        assertThat(service.exists(like.user.userId,like.post.postId)).isFalse()
     }
 
     @Test

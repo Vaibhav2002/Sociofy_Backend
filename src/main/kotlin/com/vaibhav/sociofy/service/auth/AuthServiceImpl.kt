@@ -44,6 +44,16 @@ class AuthServiceImpl @Autowired constructor(
 
     override fun getAllUsers(): List<User> = authRepository.findAll()
 
+    override fun getFollowers(userId: Long): List<User> {
+        val followers = getUserById(userId).followers.filter { it.following.userId == userId }.map { it.follower.userId }
+        return getUsersByUserIds(followers)
+    }
+
+    override fun getFollowing(userId: Long): List<User> {
+        val following = getUserById(userId).following.filter { it.follower.userId == userId }.map { it.following.userId }
+        return getUsersByUserIds(following)
+    }
+
     override fun loginUser(email: String, password: String): User {
         val user = getUserByEmail(email)
         println(user)

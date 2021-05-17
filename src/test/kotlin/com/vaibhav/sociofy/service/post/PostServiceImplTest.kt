@@ -93,7 +93,7 @@ class PostServiceImplTest {
         postService.insertIntoDb(post.copy(user = user))
         postService.insertIntoDb(post.copy(user = user2))
         postService.insertIntoDb(post.copy(user = user3))
-        val posts = postService.getAllFeedPosts(listOf<User>(user2, user3))
+        val posts = postService.getAllFeedPosts(listOf(user2.userId, user3.userId))
         assertThat(posts).isNotEmpty()
     }
 

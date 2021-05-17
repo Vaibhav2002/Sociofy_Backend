@@ -10,7 +10,7 @@ interface PostService {
     //fetching
     fun getAllPosts():List<Post>
 
-    fun getAllFeedPosts(users:List<User>):List<Post>
+    fun getAllFeedPosts(users:List<Long>):List<Post>
 
     fun getPostsOfUser(user:User):List<Post>
 

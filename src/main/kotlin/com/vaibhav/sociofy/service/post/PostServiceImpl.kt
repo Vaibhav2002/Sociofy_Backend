@@ -23,7 +23,7 @@ class PostServiceImpl @Autowired constructor(private val postRepository: PostRep
 
     override fun getAllPosts(): List<Post> = postRepository.findAll()
 
-    override fun getAllFeedPosts(users:List<User>): List<Post> = postRepository.getAllFeedPosts(users)
+    override fun getAllFeedPosts(users:List<Long>): List<Post> = postRepository.getAllFeedPosts(users)
 
     override fun deletePost(postId: Long) =
         if (checkIfPostExists(postId))

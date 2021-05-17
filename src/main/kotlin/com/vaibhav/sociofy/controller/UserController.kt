@@ -52,10 +52,21 @@ class UserController @Autowired constructor(private val mainService: MainService
         return ResponseEntity.ok(mainService.getAllUsers())
     }
 
-    @GetMapping("/allUsersById")
-    fun getAllUserByIds(@RequestParam("userIds") userIds: List<Long>): ResponseEntity<List<UserResponse>> {
-        return ResponseEntity.ok(mainService.getUsersByUserIds(userIds))
+    @GetMapping("/followers")
+    fun getAllFollowers(
+        @RequestParam("userId") userId: Long,
+    ): ResponseEntity<Any> {
+        val response = mainService.getFollowers(userId)
+        return ResponseEntity(response, response.getHttpCodeForGet())
     }
+    @GetMapping("/following")
+    fun getAllFollowing(
+        @RequestParam("userId") userId: Long,
+    ): ResponseEntity<Any> {
+        val response = mainService.getFollowing(userId)
+        return ResponseEntity(response, response.getHttpCodeForGet())
+    }
+
 
     @PutMapping("/updateUserDetail")
     fun updateUserDetails(

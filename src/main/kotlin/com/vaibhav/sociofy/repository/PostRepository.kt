@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository
 @Repository
 interface PostRepository : JpaRepository<Post, Long> {
 
-    @Query("SELECT p FROM post_table p WHERE p.id IN ?1")
-    fun getAllFeedPosts(users:List<User>): List<Post>
+    @Query("SELECT p FROM post_table p WHERE p.user.userId IN ?1")
+    fun getAllFeedPosts(users:List<Long>): List<Post>
 
     fun findAllByUser(user:User): List<Post>
 

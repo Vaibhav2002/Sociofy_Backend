@@ -29,4 +29,8 @@ interface AuthService {
 
     fun getAllUsers():List<User>
 
+    fun getFollowers(userId: Long):List<User>
+
+    fun getFollowing(userId: Long):List<User>
+
 }

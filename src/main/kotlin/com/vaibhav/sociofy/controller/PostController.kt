@@ -2,9 +2,8 @@ package com.vaibhav.sociofy.controller
 
 import com.vaibhav.sociofy.controller.utils.getHttpCode
 import com.vaibhav.sociofy.controller.utils.getHttpCodeForGet
-import com.vaibhav.sociofy.main
-import com.vaibhav.sociofy.models.entities.Post
 import com.vaibhav.sociofy.models.response.PostResponse
+import com.vaibhav.sociofy.models.response.UserResponse
 import com.vaibhav.sociofy.service.MainService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -38,12 +37,9 @@ class PostController @Autowired constructor(private val mainService: MainService
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/postsByIds")
-    fun getAllPostsOfAUsers(
-        @RequestParam("userIds") userIds:List<Long>
-    ):ResponseEntity<List<PostResponse>>{
-        val response = mainService.getAllPostByUserIds(userIds)
-        return ResponseEntity.ok(response)
+    @GetMapping("/feedPosts")
+    fun getAllFeedPosts(@RequestParam("userId") userIds: Long): ResponseEntity<List<PostResponse>> {
+        return ResponseEntity.ok(mainService.getAllFeedPosts(userIds))
     }
 
     @GetMapping("/postDetail/{postId}")

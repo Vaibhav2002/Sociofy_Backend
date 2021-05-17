@@ -32,7 +32,8 @@ data class User(
     val followers:MutableList<Follower_Following> = mutableListOf(),
 
     @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, mappedBy = "following")
-    val following:MutableList<Follower_Following> = mutableListOf()
+    val following:MutableList<Follower_Following> = mutableListOf(),
 
 
-)
+
+    )

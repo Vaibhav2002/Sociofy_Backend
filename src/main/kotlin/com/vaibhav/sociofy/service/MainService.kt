@@ -1,8 +1,6 @@
 package com.vaibhav.sociofy.service
 
-import com.vaibhav.sociofy.exceptions.AuthException
-import com.vaibhav.sociofy.exceptions.LikeException
-import com.vaibhav.sociofy.exceptions.SavedPostException
+import com.vaibhav.sociofy.exceptions.*
 import com.vaibhav.sociofy.models.entities.Notification
 import com.vaibhav.sociofy.models.entities.Post
 import com.vaibhav.sociofy.models.entities.SavedPost
@@ -43,14 +41,10 @@ class MainService @Autowired constructor(
     */
 
     private fun getCompleteUserDetails(user: User): UserDetailsResponse {
-        val followers = user.followers.filter {
-            it.following.userId == user.userId
-        }.map {
+        val followers = user.following.map {
             it.follower.userId
         }
-        val following = user.following.filter {
-            it.follower.userId == user.userId
-        }.map {
+        val following = user.followers.map {
             it.following.userId
         }
         val posts = user.posts.map {
@@ -136,13 +130,6 @@ class MainService @Autowired constructor(
         }
     }
 
-    fun getUsersByUserIds(userIds: List<Long>): List<UserResponse> {
-        val users = authServiceImpl.getUsersByUserIds(userIds)
-        return users.map {
-            getMinimalUserDetails(it)
-        }
-    }
-
 
     fun getUserDetailsByEmail(email: String): Any {
         return try {
@@ -150,6 +137,22 @@ class MainService @Autowired constructor(
             getCompleteUserDetails(user.get())
         } catch (e: Exception) {
             Response.ErrorResponse(message = e.message.toString())
+        }
+    }
+
+    fun getFollowers(userId: Long): Any {
+        return try {
+            authServiceImpl.getFollowers(userId).map { getMinimalUserDetails(it) }
+        } catch (e: AuthException) {
+            Response.ErrorResponse(e.message)
+        }
+    }
+
+    fun getFollowing(userId: Long): Any {
+        return try {
+            authServiceImpl.getFollowing(userId).map { getMinimalUserDetails(it) }
+        } catch (e: AuthException) {
+            Response.ErrorResponse(e.message)
         }
     }
 
@@ -190,8 +193,10 @@ class MainService @Autowired constructor(
             post = postServiceImpl.insertIntoDb(post)
             insertNotification(userId, post.postId)
             getCompletePostResponseData(post)
-        } catch (e: Exception) {
-            Response.ErrorResponse(e.message.toString())
+        } catch (e: AuthException) {
+            Response.ErrorResponse(e.message)
+        } catch (e: PostException) {
+            Response.ErrorResponse(e.message)
         }
 
     }
@@ -203,9 +208,10 @@ class MainService @Autowired constructor(
         }
     }
 
-    fun getAllPostByUserIds(userIds: List<Long>): List<PostResponse> {
-        val users = authServiceImpl.getUsersByUserIds(userIds)
-        val posts = postServiceImpl.getAllFeedPosts(users)
+    fun getAllFeedPosts(userId: Long): List<PostResponse> {
+        val user = authServiceImpl.getUserById(userId)
+        val following = user.followers.filter { it.follower.userId == userId }.map { it.following.userId }
+        val posts = postServiceImpl.getAllFeedPosts(following)
         return posts.map {
             getCompletePostResponseData(it)
         }
@@ -224,8 +230,8 @@ class MainService @Autowired constructor(
         return try {
             val post = postServiceImpl.getPost(postId)
             getCompletePostResponseData(post)
-        } catch (e: Exception) {
-            Response.ErrorResponse(message = e.message.toString())
+        } catch (e: PostException) {
+            Response.ErrorResponse(e.message)
         }
     }
 
@@ -233,8 +239,8 @@ class MainService @Autowired constructor(
         return try {
             postServiceImpl.deletePost(postId)
             Response.SuccessResponse(message = "Post deleted successfully")
-        } catch (e: Exception) {
-            Response.ErrorResponse(message = "Failed to delete post")
+        } catch (e: PostException) {
+            Response.ErrorResponse(e.message)
         }
     }
 
@@ -282,8 +288,12 @@ class MainService @Autowired constructor(
             val post = postServiceImpl.getPost(postId)
             val savedPost = savedPostServiceImpl.savePost(SavedPost(user = user, post = post))
             getCompleteSavedPostDetail(savedPost)
+        } catch (e: AuthException) {
+            Response.ErrorResponse(e.message)
+        } catch (e: PostException) {
+            Response.ErrorResponse(e.message)
         } catch (e: SavedPostException) {
-            Response.ErrorResponse(message = "Failed to delete saved post")
+            Response.ErrorResponse(message = e.message)
         }
     }
 
@@ -298,6 +308,10 @@ class MainService @Autowired constructor(
             val post = postServiceImpl.getPost(postId)
             likeServiceImpl.likePost(user, post)
             Response.SuccessResponse("Post liked successfully")
+        } catch (e: AuthException) {
+            Response.ErrorResponse(e.message)
+        } catch (e: PostException) {
+            Response.ErrorResponse(e.message)
         } catch (e: LikeException) {
             Response.ErrorResponse(message = e.message)
         }
@@ -305,7 +319,7 @@ class MainService @Autowired constructor(
 
     fun disLikePost(userId: Long, postId: Long): Response {
         return try {
-            likeServiceImpl.dislikePost(userId,postId)
+            likeServiceImpl.dislikePost(userId, postId)
             Response.SuccessResponse("Post disliked successfully")
         } catch (e: LikeException) {
             Response.ErrorResponse(message = e.message)
@@ -404,27 +418,29 @@ class MainService @Autowired constructor(
     fun followUser(followerUserId: Long, followingUserId: Long): Response {
         return try {
             val follower = authServiceImpl.getUserById(followerUserId)
-            val following =authServiceImpl.getUserById(followingUserId)
+            val following = authServiceImpl.getUserById(followingUserId)
             followFollowingServiceImpl.followUser(follower, following)
             Response.SuccessResponse("User followed Successfully")
-        } catch (e: Exception) {
-            Response.ErrorResponse(message = "Failed to follow user")
+        } catch (e: FollowerFollowingException) {
+            Response.ErrorResponse(message = e.message)
+        } catch (e: AuthException) {
+            Response.ErrorResponse(message = e.message)
         }
     }
 
     fun unfollowUser(followerUserId: Long, followingUserId: Long): Response {
         return try {
-            val follower = authServiceImpl.getUserById(followerUserId)
-            val following =authServiceImpl.getUserById(followingUserId)
-            followFollowingServiceImpl.unfollowUser(follower, following)
+            followFollowingServiceImpl.unfollowUser(followerUserId, followingUserId)
             Response.SuccessResponse("User unfollowed Successfully")
-        } catch (e: Exception) {
-            Response.ErrorResponse(message = "Failed to unfollow user")
+        } catch (e: FollowerFollowingException) {
+            Response.ErrorResponse(message = e.message)
+        } catch (e: AuthException) {
+            Response.ErrorResponse(message = e.message)
         }
     }
 
-    fun getAllFollowersOfUser(userId: Long) = followFollowingServiceImpl.getAllFollowers(userId)
+    fun getAllFollowerIdsOfUser(userId: Long) = followFollowingServiceImpl.getAllFollowers(userId)
 
-    fun getAllFollowingOfAUser(userId: Long) = followFollowingServiceImpl.getAllFollowing(userId)
+    fun getAllFollowingIdsOfAUser(userId: Long) = followFollowingServiceImpl.getAllFollowing(userId)
 
 }

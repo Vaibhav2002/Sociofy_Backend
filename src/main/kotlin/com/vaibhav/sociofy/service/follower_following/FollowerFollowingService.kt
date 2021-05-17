@@ -10,7 +10,9 @@ interface FollowerFollowingService {
 
     fun followUser(follower: User, following: User)
 
-    fun unfollowUser(follower: User, following: User)
+    fun existsFollowing(followerId: Long,followingId: Long):Boolean
+
+    fun unfollowUser(followerId: Long, followingId: Long)
 
     fun deleteAllOfUser(userId: Long)
 
